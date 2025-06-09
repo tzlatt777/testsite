@@ -1,219 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>QR Code Scanner PWA</title>
-<meta name="description" content="Scan QR codes with your camera using this PWA web app." />
-<style>
-  /* Reset & base */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #ffffff;
-    color: #6b7280;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    align-items: center;
-    padding: 4rem 1rem 2rem;
-  }
-  header {
-    width: 100%;
-    max-width: 1200px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    background: #ffffff;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 1px 5px rgb(0 0 0 / 0.1);
-    z-index: 10;
-  }
-  header .logo {
-    font-weight: 700;
-    font-size: 1.5rem;
-    color: #111827;
-    user-select: none;
-  }
-  main {
-    max-width: 600px;
-    width: 100%;
-    margin-top: 3rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
-  }
-  h1 {
-    font-size: 48px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0;
-    text-align: center;
-  }
-  p.description {
-    font-size: 18px;
-    color: #4b5563;
-    text-align: center;
-  }
-  .card {
-    background: #f9fafb;
-    border-radius: 0.75rem;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 0.05);
-    width: 100%;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  video {
-    width: 100%;
-    height: auto;
-    border-radius: 0.75rem;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-    background: black;
-  }
-  canvas {
-    display: none;
-  }
-  .qr-result {
-    margin-top: 1rem;
-    font-size: 18px;
-    color: #111827;
-    font-weight: 600;
-    word-break: break-all;
-    user-select: text;
-    min-height: 2rem;
-  }
-  button {
-    margin-top: 1rem;
-    padding: 0.75rem 1.6rem;
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-    background: #000000;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  button:hover,
-  button:focus {
-    background: #374151;
-  }
-  footer {
-    margin-top: auto;
-    padding: 2rem 1rem 1rem;
-    font-size: 14px;
-    color: #9ca3af;
-    text-align: center;
-  }
-  /* Responsive */
-  @media (max-width: 480px) {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Scanner</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     h1 {
-      font-size: 36px;
+      color: #111;
+      margin-top: 1rem;
+    }
+    #video {
+      width: 90%;
+      max-width: 500px;
+      margin: 1rem 0;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+    canvas {
+      display: none;
+    }
+    #qrResult {
+      margin: 1rem;
+      font-size: 1.1rem;
+      color: #333;
+      padding: 0.5rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #eef;
     }
     button {
-      font-size: 16px;
-      padding: 0.6rem 1.4rem;
+      margin: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
     }
-  }
-</style>
+    #startButton {
+      background-color: #28a745;
+      color: white;
+    }
+    #stopButton {
+      background-color: #dc3545;
+      color: white;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="logo">QR Scanner PWA</div>
-</header>
-<main>
-  <h1>Scan QR Codes</h1>
-  <p class="description">Use your device camera to scan QR codes quickly and easily.</p>
-  <div class="card" aria-live="polite" aria-label="Camera and QR code scanner area">
-    <video id="video" autoplay muted playsinline aria-label="Camera preview"></video>
-    <canvas id="canvas"></canvas>
-    <div class="qr-result" id="qr-result" aria-live="polite" aria-atomic="true" tabindex="0">No QR code detected yet.</div>
-    <button id="start-button">Start Camera</button>
-    <button id="stop-button" style="display:none;">Stop Camera</button>
-  </div>
-</main>
-<footer>
-  &copy; 2025 QR Scanner PWA — Works best on modern browsers &amp; iOS Safari.
-</footer>
+  <h1>📷 QR Code Scanner</h1>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas"></canvas>
+  <div id="qrResult">No QR code detected yet.</div>
+  <button id="startButton">Start Camera</button>
+  <button id="stopButton">Stop Camera</button>
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
-<script>
-  const video = document.getElementById("video");
-  const canvas = document.getElementById("canvas");
-  const qrResult = document.getElementById("qr-result");
-  const startButton = document.getElementById("start-button");
-  const stopButton = document.getElementById("stop-button");
-  const canvasContext = canvas.getContext("2d");
+  <script src="https://unpkg.com/jsqr"></script>
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const canvasContext = canvas.getContext("2d");
+    const qrResult = document.getElementById("qrResult");
+    const startButton = document.getElementById("startButton");
+    const stopButton = document.getElementById("stopButton");
 
-  let videoStream = null;
-  let scanning = false;
+    let scanning = false;
+    let videoStream = null;
 
-  async function startCamera() {
-    qrResult.textContent = "Starting camera...";
-    try {
-      videoStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" }
-      });
-      video.srcObject = videoStream;
-      video.setAttribute("playsinline", true); // for iOS safari
-      scanning = true;
-      scanFrame();
-      startButton.style.display = "none";
-      stopButton.style.display = "inline-block";
-      qrResult.textContent = "Point your camera at a QR code.";
-    } catch (error) {
-      qrResult.textContent = "Could not start camera: " + error.message;
-      console.error("getUserMedia error:", error);
-    }
-  }
-
-  function stopCamera() {
-    scanning = false;
-    if (videoStream) {
-      videoStream.getTracks().forEach(track => track.stop());
-    }
-    video.srcObject = null;
-    qrResult.textContent = "Camera stopped.";
-    startButton.style.display = "inline-block";
-    stopButton.style.display = "none";
-  }
-
-  function scanFrame(){
-    if (!scanning) return;
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.height = video.videoHeight;
-      canvas.width = video.videoWidth;
-      canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "dontInvert",
-      });
-      if (code) {
-        qrResult.textContent = code.data;
-        qrResult.focus();
-      } else {
-        qrResult.textContent = "No QR code detected.";
+    async function startCamera() {
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }
+        });
+        video.srcObject = videoStream;
+        video.setAttribute("playsinline", true); // for iOS
+        await video.play();
+        scanning = true;
+        requestAnimationFrame(scanFrame);
+        qrResult.textContent = "Scanning for QR code...";
+        startButton.style.display = "none";
+        stopButton.style.display = "inline-block";
+      } catch (err) {
+        qrResult.textContent = "Camera error: " + err.message;
+        console.error(err);
       }
     }
-    requestAnimationFrame(scanFrame);
-  }
 
-  startButton.addEventListener("click", startCamera);
-  stopButton.addEventListener("click", stopCamera);
+    function stopCamera() {
+      scanning = false;
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+      video.srcObject = null;
+      qrResult.textContent = "Camera stopped.";
+      startButton.style.display = "inline-block";
+      stopButton.style.display = "none";
+    }
 
-  // Optionally auto start camera on page load after user gesture
-  // window.addEventListener("load", () => {
-  //   startButton.click();
-  // });
-</script>
+    function scanFrame() {
+      if (!scanning) return;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth;
+        canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        if (code) {
+          qrResult.textContent = "✅ QR Code: " + code.data;
+        } else {
+          qrResult.textContent = "Scanning for QR code...";
+        }
+      }
+      requestAnimationFrame(scanFrame);
+    }
+
+    startButton.addEventListener("click", startCamera);
+    stopButton.addEventListener("click", stopCamera);
+  </script>
 </body>
 </html>
-
